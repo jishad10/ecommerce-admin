@@ -22,12 +22,29 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import Delete from "../custom ui/Delete";
 
+// Define the validation schema using Zod
 const formSchema = z.object({
-  title: z.string().min(2).max(20),
-  description: z.string().min(2).max(500).trim(),
-  image: z.string(),
+  title: z
+    .string()
+    .min(2, "Title must be at least 2 characters")
+    .max(20, "Title must be at most 20 characters"),
+  description: z
+    .string()
+    .min(2, "Description must be at least 2 characters")
+    .max(500, "Description is too long")
+    .trim(),
+  image: z.string().url("Invalid image URL"),
 });
 
+// Define the CollectionType interface
+interface CollectionType {
+  _id: string;
+  title: string;
+  description?: string;
+  image?: string;
+}
+
+// Define props type
 interface CollectionFormProps {
   initialData?: CollectionType | null;
 }
@@ -36,10 +53,15 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
+  // Initialize form with default values and validation schema
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData
-      ? initialData
+      ? {
+          title: initialData.title || "",
+          description: initialData.description || "",
+          image: initialData.image || "",
+        }
       : {
           title: "",
           description: "",
@@ -47,37 +69,43 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
         },
   });
 
+  // Prevent form submission on "Enter" key press
   const handleKeyPress = (
-    e:
-      | React.KeyboardEvent<HTMLInputElement>
-      | React.KeyboardEvent<HTMLTextAreaElement>
+    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     if (e.key === "Enter") {
       e.preventDefault();
     }
   };
 
+  // Handle form submission
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      setLoading(true); // Set loading to true during submission
+      setLoading(true);
       const url = initialData
         ? `/api/collections/${initialData._id}`
         : "/api/collections";
+      const method = initialData ? "PUT" : "POST";
+
       const res = await fetch(url, {
-        method: "POST",
+        method,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
+
       if (res.ok) {
-        toast.success(`Collection ${initialData ? "updated" : "created"}`);
+        toast.success(
+          `Collection ${initialData ? "updated" : "created"} successfully`
+        );
         router.push("/collections");
       } else {
         toast.error("Something went wrong! Please try again.");
       }
     } catch (err) {
-      console.log("[collections_POST]", err);
+      console.error("[collections_SUBMIT_ERROR]", err);
       toast.error("Something went wrong! Please try again.");
     } finally {
-      setLoading(false); // Reset loading state after submission
+      setLoading(false);
     }
   };
 
@@ -91,9 +119,12 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
       ) : (
         <p className="text-heading2-bold">Create Collection</p>
       )}
+
       <Separator className="bg-grey-1 mt-4 mb-7" />
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          {/* Title Field */}
           <FormField
             control={form.control}
             name="title"
@@ -111,6 +142,8 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
               </FormItem>
             )}
           />
+
+          {/* Description Field */}
           <FormField
             control={form.control}
             name="description"
@@ -129,6 +162,8 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
               </FormItem>
             )}
           />
+
+          {/* Image Upload Field */}
           <FormField
             control={form.control}
             name="image"
@@ -146,19 +181,21 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
               </FormItem>
             )}
           />
+
+          {/* Action Buttons */}
           <div className="flex gap-10">
             <Button
               type="submit"
               className="bg-blue-1 text-white"
-              disabled={loading} // Disable button while loading
+              disabled={loading}
             >
               {loading ? "Submitting..." : "Submit"}
             </Button>
             <Button
               type="button"
               onClick={() => router.push("/collections")}
-              className="bg-blue-1 text-white"
-              disabled={loading} // Disable button while loading
+              className="bg-gray-400 text-white"
+              disabled={loading}
             >
               {loading ? "Please wait..." : "Discard"}
             </Button>
