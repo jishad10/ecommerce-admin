@@ -13,17 +13,19 @@ interface CollectionType {
   [key: string]: any; // For additional optional fields
 }
 
-// Fixing type for params
-interface PageProps {
-  params: { collectionId: string };
+// Fixing dynamic route props
+interface CollectionDetailsProps {
+  params: { collectionId: string }; // Ensures params are typed correctly
 }
 
-const CollectionDetails = ({ params }: PageProps) => {
+// Functional Component for Collection Details
+const CollectionDetails: React.FC<CollectionDetailsProps> = ({ params }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [collectionDetails, setCollectionDetails] = useState<
     CollectionType | null | undefined
   >(null);
 
+  // Fetch collection details
   const getCollectionDetails = async () => {
     try {
       const res = await fetch(`/api/collections/${params.collectionId}`, {
