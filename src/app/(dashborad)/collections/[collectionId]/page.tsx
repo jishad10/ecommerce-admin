@@ -13,7 +13,7 @@ interface CollectionType {
   [key: string]: any; // For additional optional fields
 }
 
-// Fixing dynamic route props
+// Fixing dynamic route props type
 interface CollectionDetailsProps {
   params: { collectionId: string }; // Ensures params are typed correctly
 }
