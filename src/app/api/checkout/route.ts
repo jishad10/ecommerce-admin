@@ -11,9 +11,28 @@ export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
 
+// Define types for cart items and customer
+interface CartItem {
+  item: {
+    title: string;
+    _id: string;
+    price: number;
+  };
+  quantity: number;
+  size?: string;
+  color?: string;
+}
+
+interface Customer {
+  clerkId: string;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { cartItems, customer } = await req.json();
+    const { cartItems, customer } = (await req.json()) as {
+      cartItems: CartItem[];
+      customer: Customer;
+    };
 
     if (!cartItems || !customer) {
       return new NextResponse("Not enough data to checkout", { status: 400 });
@@ -29,7 +48,7 @@ export async function POST(req: NextRequest) {
         { shipping_rate: "shr_1QODpJGI6mDDNdWgF4doSdZN" },
         { shipping_rate: "shr_1QODqJGI6mDDNdWggrAZxZ1D" },
       ],
-      line_items: cartItems.map((cartItem: any) => ({
+      line_items: cartItems.map((cartItem: CartItem) => ({
         price_data: {
           currency: "usd",
           product_data: {
@@ -50,8 +69,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(session, { headers: corsHeaders });
-  } catch (err) {
-    console.log("[checkout_POST]", err);
+  } catch (err: unknown) {
+    console.error("[checkout_POST]", err);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
