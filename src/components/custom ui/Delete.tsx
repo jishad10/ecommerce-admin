@@ -27,27 +27,31 @@ const Delete: React.FC<DeleteProps> = ({ item, id }) => {
 
   const onDelete = async () => {
     try {
-      setLoading(true);
+      setLoading(true); // Set loading to true before starting the operation
       const itemType = item === "product" ? "products" : "collections";
       const res = await fetch(`/api/${itemType}/${id}`, {
         method: "DELETE",
       });
 
       if (res.ok) {
-        setLoading(false);
-        window.location.href = `/${itemType}`;
         toast.success(`${item} deleted`);
+        window.location.href = `/${itemType}`;
+      } else {
+        toast.error("Failed to delete. Please try again.");
       }
     } catch (err) {
       console.log(err);
       toast.error("Something went wrong! Please try again.");
+    } finally {
+      setLoading(false); // Reset loading state after completion
     }
   };
+
   return (
     <AlertDialog>
       <AlertDialogTrigger>
-        <Button className="bg-red-1 text-white">
-          <Trash className="h-4 w-4" />
+        <Button className="bg-red-1 text-white" disabled={loading}>
+          {loading ? "Deleting..." : <Trash className="h-4 w-4" />}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="bg-white text-grey-1">
@@ -61,9 +65,13 @@ const Delete: React.FC<DeleteProps> = ({ item, id }) => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction className="bg-red-1 text-white" onClick={onDelete}>
-            Delete
+          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-red-1 text-white"
+            onClick={onDelete}
+            disabled={loading}
+          >
+            {loading ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

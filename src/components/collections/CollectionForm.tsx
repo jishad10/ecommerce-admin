@@ -29,7 +29,7 @@ const formSchema = z.object({
 });
 
 interface CollectionFormProps {
-  initialData?: CollectionType | null; // Must have "?" to make it optional
+  initialData?: CollectionType | null;
 }
 
 const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
@@ -48,7 +48,9 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
   });
 
   const handleKeyPress = (
-    e: React.KeyboardEvent<HTMLInputElement> | React.KeyboardEvent<HTMLTextAreaElement>
+    e:
+      | React.KeyboardEvent<HTMLInputElement>
+      | React.KeyboardEvent<HTMLTextAreaElement>
   ) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -57,7 +59,7 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      setLoading(true);
+      setLoading(true); // Set loading to true during submission
       const url = initialData
         ? `/api/collections/${initialData._id}`
         : "/api/collections";
@@ -66,14 +68,16 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
         body: JSON.stringify(values),
       });
       if (res.ok) {
-        setLoading(false);
         toast.success(`Collection ${initialData ? "updated" : "created"}`);
-        window.location.href = "/collections";
         router.push("/collections");
+      } else {
+        toast.error("Something went wrong! Please try again.");
       }
     } catch (err) {
       console.log("[collections_POST]", err);
       toast.error("Something went wrong! Please try again.");
+    } finally {
+      setLoading(false); // Reset loading state after submission
     }
   };
 
@@ -97,7 +101,11 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
               <FormItem>
                 <FormLabel>Title</FormLabel>
                 <FormControl>
-                  <Input placeholder="Title" {...field} onKeyDown={handleKeyPress} />
+                  <Input
+                    placeholder="Title"
+                    {...field}
+                    onKeyDown={handleKeyPress}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -130,8 +138,8 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
                 <FormControl>
                   <ImageUpload
                     value={field.value ? [field.value] : []}
-                    onChange={(url) => field.onChange(url)} // Pass the image URL to the form field
-                    onRemove={() => field.onChange("")} // Remove image URL if needed
+                    onChange={(url) => field.onChange(url)}
+                    onRemove={() => field.onChange("")}
                   />
                 </FormControl>
                 <FormMessage />
@@ -139,15 +147,20 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
             )}
           />
           <div className="flex gap-10">
-            <Button type="submit" className="bg-blue-1 text-white">
-              Submit
+            <Button
+              type="submit"
+              className="bg-blue-1 text-white"
+              disabled={loading} // Disable button while loading
+            >
+              {loading ? "Submitting..." : "Submit"}
             </Button>
             <Button
               type="button"
               onClick={() => router.push("/collections")}
               className="bg-blue-1 text-white"
+              disabled={loading} // Disable button while loading
             >
-              Discard
+              {loading ? "Please wait..." : "Discard"}
             </Button>
           </div>
         </form>

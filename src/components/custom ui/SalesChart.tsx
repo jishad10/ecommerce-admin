@@ -10,7 +10,13 @@ import {
   Tooltip,
 } from "recharts";
 
-const SalesChart = ({ data }: { data: any[] }) => {
+// Define the type for the data array elements
+interface SalesData {
+  name: string; // Label for the X-axis
+  sales: number; // Sales value for the Y-axis
+}
+
+const SalesChart = ({ data }: { data: SalesData[] }) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart
