@@ -13,17 +13,14 @@ interface CollectionType {
   [key: string]: any; // For additional optional fields
 }
 
-// Fixing dynamic route props type
-interface CollectionDetailsProps {
-  params: { collectionId: string }; // Ensures params are typed correctly
-}
-
-// Functional Component for Collection Details
-const CollectionDetails: React.FC<CollectionDetailsProps> = ({ params }) => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [collectionDetails, setCollectionDetails] = useState<
-    CollectionType | null | undefined
-  >(null);
+const CollectionDetails = ({
+  params,
+}: {
+  params: { collectionId: string };
+}) => {
+  const [loading, setLoading] = useState(true);
+  const [collectionDetails, setCollectionDetails] =
+    useState<CollectionType | null>(null);
 
   // Fetch collection details
   const getCollectionDetails = async () => {
