@@ -2,10 +2,10 @@ import Customer from "@/lib/models/Customer";
 import Order from "@/lib/models/Order";
 import { connectToDB } from "@/lib/mongoDB";
 
-import { NextRequest, NextResponse } from "next/server";
+import {  NextResponse } from "next/server";
 import { format } from "date-fns";
 
-export const GET = async (req: NextRequest) => {
+export const GET = async () => {
   try {
     await connectToDB()
 
