@@ -1,3 +1,5 @@
+/*
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -67,3 +69,4 @@ const CollectionDetails: React.FC<CollectionDetailsProps> = ({ params }) => {
 };
 
 export default CollectionDetails;
+*/
