@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Loader from "@/components/custom ui/Loader";
 import CollectionForm from "@/components/collections/CollectionForm";
+import { useRouter } from "next/navigation";
 
 // Define the CollectionType interface
 interface CollectionType {
@@ -10,14 +11,19 @@ interface CollectionType {
   title: string;
   description?: string;
   image?: string;
-  [key: string]: any; // For additional optional fields
 }
 
-const CollectionDetails = ({
-  params,
-}: {
-  params: { collectionId: string };
-}) => {
+// Type for the props
+interface CollectionDetailsProps {
+  params: {
+    collectionId: string;
+  };
+}
+
+const CollectionDetails: React.FC<CollectionDetailsProps> = ({ params }) => {
+  const { collectionId } = params; // Destructure collectionId
+  const router = useRouter();
+
   const [loading, setLoading] = useState(true);
   const [collectionDetails, setCollectionDetails] =
     useState<CollectionType | null>(null);
@@ -25,7 +31,7 @@ const CollectionDetails = ({
   // Fetch collection details
   const getCollectionDetails = async () => {
     try {
-      const res = await fetch(`/api/collections/${params.collectionId}`, {
+      const res = await fetch(`/api/collections/${collectionId}`, {
         method: "GET",
       });
 
@@ -38,14 +44,20 @@ const CollectionDetails = ({
     } catch (err) {
       console.error("[collectionId_GET]", err);
       setCollectionDetails(null); // Handle error state
+      router.push("/error"); // Navigate to an error page if needed
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    getCollectionDetails();
-  }, [params.collectionId]);
+    if (collectionId) {
+      getCollectionDetails();
+    } else {
+      console.error("No collectionId provided");
+      router.push("/error"); // Navigate to an error page if needed
+    }
+  }, [collectionId]);
 
   return loading ? (
     <Loader />
