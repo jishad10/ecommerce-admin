@@ -37,7 +37,7 @@ const CollectionDetails = ({
       setCollectionDetails(data);
     } catch (err) {
       console.error("[collectionId_GET]", err);
-      setCollectionDetails(undefined); // Handle error state
+      setCollectionDetails(null); // Handle error state
     } finally {
       setLoading(false);
     }
